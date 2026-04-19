@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediaSnap — Download Videos & Music in Highest Quality</title>
+  <meta name="description" content="Download YouTube, Instagram, and Facebook videos in 4K or music at 192kbps for free. No signup required."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+  <!-- Animated background -->
+  <div class="bg-mesh"></div>
+  <div class="orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name">MediaSnap</span>
+    </div>
+    <div class="nav-badges">
+      <span class="badge">4K Video</span>
+      <span class="badge">192kbps Audio</span>
+      <span class="badge">Free Forever</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-tag">✨ No Sign-up Required</div>
+      <h1 class="hero-title">
+        Download Any <span class="gradient-text">Video or Music</span><br/>at Lightning Speed
+      </h1>
+      <p class="hero-subtitle">
+        Paste a link from YouTube, Instagram, or Facebook and download in stunning 4K quality or 192kbps audio instantly.
+      </p>
+
+      <!-- Platform icons -->
+      <div class="platforms">
+        <div class="platform-chip">
+          <img src="https://www.youtube.com/favicon.ico" alt="YouTube" class="platform-logo" onerror="this.style.display='none'"/>
+          <span>YouTube</span>
+        </div>
+        <div class="platform-chip">
+          <img src="https://www.instagram.com/favicon.ico" alt="Instagram" class="platform-logo" onerror="this.style.display='none'"/>
+          <span>Instagram</span>
+        </div>
+        <div class="platform-chip">
+          <img src="https://www.facebook.com/favicon.ico" alt="Facebook" class="platform-logo" onerror="this.style.display='none'"/>
+          <span>Facebook</span>
+        </div>
+        <div class="platform-chip">
+          <span>🎵</span>
+          <span>TikTok</span>
+        </div>
+        <div class="platform-chip">
+          <span>🐦</span>
+          <span>Twitter/X</span>
+        </div>
+      </div>
+
+      <!-- Main Input Card -->
+      <div class="input-card" id="mainCard">
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="btnVideo" onclick="setMode('video')">
+            <span class="mode-icon">🎬</span> Video (MP4)
+          </button>
+          <button class="mode-btn" id="btnAudio" onclick="setMode('audio')">
+            <span class="mode-icon">🎵</span> Audio (MP3)
+          </button>
+        </div>
+
+        <!-- Quality selector (video only) -->
+        <div class="quality-row" id="qualityRow">
+          <label class="quality-label">Quality:</label>
+          <div class="quality-options">
+            <button class="q-btn" data-q="2160" onclick="setQuality(this)">4K</button>
+            <button class="q-btn active" data-q="1080" onclick="setQuality(this)">1080p</button>
+            <button class="q-btn" data-q="720" onclick="setQuality(this)">720p</button>
+            <button class="q-btn" data-q="480" onclick="setQuality(this)">480p</button>
+            <button class="q-btn" data-q="360" onclick="setQuality(this)">360p</button>
+          </div>
+        </div>
+
+        <!-- URL Input -->
+        <div class="url-row">
+          <div class="url-input-wrap">
+            <span class="url-icon">🔗</span>
+            <input
+              type="url"
+              id="urlInput"
+              class="url-input"
+              placeholder="Paste YouTube, Instagram or Facebook link here..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="paste-btn" id="pasteBtn" onclick="pasteFromClipboard()" title="Paste from clipboard">📋</button>
+          </div>
+          <button class="fetch-btn" id="fetchBtn" onclick="fetchInfo()">
+            <span class="btn-text">Analyse</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Card (shows after fetch) -->
+      <div class="info-card hidden" id="infoCard">
+        <div class="info-inner">
+          <div class="info-thumb-wrap">
+            <img id="infoThumb" src="" alt="Thumbnail" class="info-thumb"/>
+            <div class="info-platform-badge" id="infoPlatform"></div>
+          </div>
+          <div class="info-details">
+            <h3 class="info-title" id="infoTitle">Loading...</h3>
+            <p class="info-meta">
+              <span id="infoUploader"></span>
+              <span class="dot">·</span>
+              <span id="infoDuration"></span>
+            </p>
+            <div class="download-actions">
+              <button class="dl-btn" id="downloadBtn" onclick="startDownload()">
+                <span class="dl-icon">⬇</span>
+                <span class="dl-text" id="dlBtnText">Download Now</span>
+              </button>
+              <button class="reset-btn" onclick="resetUI()">✕ New</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress card -->
+      <div class="progress-card hidden" id="progressCard">
+        <div class="progress-header">
+          <span class="progress-icon spin">⚙</span>
+          <span class="progress-label" id="progressLabel">Preparing download...</span>
+        </div>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progressBar"></div>
+        </div>
+        <p class="progress-hint">This may take a minute for large files. Please wait.</p>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Lightning Fast</h3>
+        <p>Powered by yt-dlp, the fastest media downloader engine available.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎥</div>
+        <h3>4K Ultra HD</h3>
+        <p>Download videos in 4K, 1080p, 720p and more resolutions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎵</div>
+        <h3>192kbps MP3</h3>
+        <p>Extract audio as high-quality 192kbps MP3 with embedded artwork.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Private & Safe</h3>
+        <p>No account needed. Files are deleted from server after download.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>Multi-Platform</h3>
+        <p>YouTube, Instagram, Facebook, TikTok, Twitter/X and 1000+ sites.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✨</div>
+        <h3>Completely Free</h3>
+        <p>No watermarks, no limits, no sign-up. Just paste and download.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How to use -->
+  <section class="howto">
+    <h2 class="section-title">How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Copy the link</h4>
+        <p>Open YouTube, Instagram, or Facebook and copy the video URL.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Paste & Analyse</h4>
+        <p>Paste the link above and click Analyse to preview the media.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Download</h4>
+        <p>Choose quality and hit Download. File saves directly to your device.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>⚡ MediaSnap — Built for speed. Download responsibly and respect copyright laws.</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
