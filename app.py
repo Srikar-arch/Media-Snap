@@ -66,6 +66,12 @@ def detect_platform(url):
         return "twitter"
     return "other"
 
+def get_extra_flags(url):
+    platform = detect_platform(url)
+    if platform == "instagram":
+        return ["--user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"]
+    return []
+
 def clean_error(stderr):
     """Return a short, user-friendly error from yt-dlp stderr."""
     if not stderr:
@@ -80,7 +86,7 @@ def get_video_info(url):
     """Fetch video metadata using yt-dlp."""
     try:
         result = subprocess.run(
-            YTDLP_CMD + COMMON_FLAGS + ["--dump-json", url],
+            YTDLP_CMD + COMMON_FLAGS + get_extra_flags(url) + ["--dump-json", url],
             capture_output=True, text=True, timeout=45
         )
         if result.returncode == 0:
@@ -114,7 +120,7 @@ def run_download(job_id, url, mode, quality, out_dir):
 
         if mode == "audio":
             out_tmpl = str(out_dir / "output.%(ext)s")
-            cmd = YTDLP_CMD + COMMON_FLAGS + [
+            cmd = YTDLP_CMD + COMMON_FLAGS + get_extra_flags(url) + [
                 "-x",
                 "--audio-format", "mp3",
                 "--audio-quality", "0",
@@ -133,7 +139,7 @@ def run_download(job_id, url, mode, quality, out_dir):
                     f"/best[height<={height}]"
                     f"/best"
                 )
-                cmd = YTDLP_CMD + COMMON_FLAGS + [
+                cmd = YTDLP_CMD + COMMON_FLAGS + get_extra_flags(url) + [
                     "-f", fmt,
                     "--merge-output-format", "mp4",
                     "-o", out_tmpl,
@@ -143,7 +149,7 @@ def run_download(job_id, url, mode, quality, out_dir):
                 # Instagram / Facebook / TikTok / Twitter — pre-merged single stream
                 # Use best mp4 directly; no merging needed
                 fmt = "best[ext=mp4]/best"
-                cmd = YTDLP_CMD + COMMON_FLAGS + [
+                cmd = YTDLP_CMD + COMMON_FLAGS + get_extra_flags(url) + [
                     "-f", fmt,
                     "--merge-output-format", "mp4",
                     "-o", out_tmpl,
