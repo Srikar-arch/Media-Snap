@@ -19,9 +19,24 @@ DOWNLOAD_DIR.mkdir(exist_ok=True)
 # Use venv python to call yt_dlp module
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 
-# Common yt-dlp flags (ffmpeg path for merging streams)
+# Find ffmpeg — works on Mac (Homebrew), Linux servers, and anywhere
+def find_ffmpeg():
+    candidates = [
+        shutil.which("ffmpeg"),             # system PATH (Linux servers, Render)
+        "/opt/homebrew/bin/ffmpeg",         # macOS Homebrew (Apple Silicon)
+        "/usr/local/bin/ffmpeg",            # macOS Homebrew (Intel)
+        "/usr/bin/ffmpeg",                  # Linux system
+    ]
+    for p in candidates:
+        if p and os.path.isfile(p):
+            return p
+    return "ffmpeg"
+
+FFMPEG = find_ffmpeg()
+
+# Common yt-dlp flags
 COMMON_FLAGS = [
-    "--ffmpeg-location", "/opt/homebrew/bin/ffmpeg",
+    "--ffmpeg-location", FFMPEG,
     "--no-warnings",
     "--no-playlist",
 ]
@@ -89,7 +104,6 @@ def run_download(job_id, url, mode, quality, out_dir):
                 "-x",
                 "--audio-format", "mp3",
                 "--audio-quality", "0",
-                "--ffmpeg-location", "/opt/homebrew/bin/ffmpeg",
                 "-o", out_tmpl,
                 url,
             ]
@@ -105,7 +119,6 @@ def run_download(job_id, url, mode, quality, out_dir):
             cmd = YTDLP_CMD + COMMON_FLAGS + [
                 "-f", fmt,
                 "--merge-output-format", "mp4",
-                "--ffmpeg-location", "/opt/homebrew/bin/ffmpeg",
                 "-o", out_tmpl,
                 url,
             ]
