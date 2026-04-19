@@ -19,15 +19,24 @@ DOWNLOAD_DIR.mkdir(exist_ok=True)
 # Use venv python to call yt_dlp module
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 
-# Find ffmpeg — works on Mac (Homebrew), Linux servers, and anywhere
+# Find ffmpeg — static-ffmpeg works on Render/servers without root access
 def find_ffmpeg():
-    candidates = [
-        shutil.which("ffmpeg"),             # system PATH (Linux servers, Render)
-        "/opt/homebrew/bin/ffmpeg",         # macOS Homebrew (Apple Silicon)
-        "/usr/local/bin/ffmpeg",            # macOS Homebrew (Intel)
-        "/usr/bin/ffmpeg",                  # Linux system
-    ]
-    for p in candidates:
+    # 1. Try static-ffmpeg Python package (works everywhere, no system install needed)
+    try:
+        import static_ffmpeg
+        static_ffmpeg.add_paths()   # adds bundled ffmpeg to PATH
+        p = shutil.which("ffmpeg")
+        if p:
+            return p
+    except Exception:
+        pass
+    # 2. Fallback: check common system locations
+    for p in [
+        shutil.which("ffmpeg"),
+        "/opt/homebrew/bin/ffmpeg",     # macOS Homebrew Apple Silicon
+        "/usr/local/bin/ffmpeg",        # macOS Homebrew Intel
+        "/usr/bin/ffmpeg",              # Linux
+    ]:
         if p and os.path.isfile(p):
             return p
     return "ffmpeg"
