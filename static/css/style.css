@@ -257,7 +257,8 @@ body {
 .info-title {
   font-size: 1.05rem; font-weight: 700; margin-bottom: 8px;
   overflow: hidden; text-overflow: ellipsis;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  max-height: 3.4em; /* approx 2 lines */
+  line-clamp: 2;
 }
 .info-meta { font-size: 0.85rem; color: var(--text2); margin-bottom: 18px; }
 .dot { margin: 0 6px; }
