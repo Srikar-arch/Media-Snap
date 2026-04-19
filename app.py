@@ -98,6 +98,9 @@ def run_download(job_id, url, mode, quality, out_dir):
     try:
         job_status[job_id] = {"status": "downloading", "file": None, "error": None}
 
+        platform = detect_platform(url)
+        is_youtube = platform == "youtube"
+
         if mode == "audio":
             out_tmpl = str(out_dir / "output.%(ext)s")
             cmd = YTDLP_CMD + COMMON_FLAGS + [
@@ -108,20 +111,33 @@ def run_download(job_id, url, mode, quality, out_dir):
                 url,
             ]
         else:
-            height = quality if quality else "1080"
             out_tmpl = str(out_dir / "output.%(ext)s")
-            fmt = (
-                f"bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]"
-                f"/bestvideo[height<={height}]+bestaudio"
-                f"/best[height<={height}]"
-                f"/best"
-            )
-            cmd = YTDLP_CMD + COMMON_FLAGS + [
-                "-f", fmt,
-                "--merge-output-format", "mp4",
-                "-o", out_tmpl,
-                url,
-            ]
+            height = quality if quality else "1080"
+
+            if is_youtube:
+                # YouTube has separate video+audio streams — merge them
+                fmt = (
+                    f"bestvideo[height<={height}][ext=mp4]+bestaudio[ext=m4a]"
+                    f"/bestvideo[height<={height}]+bestaudio"
+                    f"/best[height<={height}]"
+                    f"/best"
+                )
+                cmd = YTDLP_CMD + COMMON_FLAGS + [
+                    "-f", fmt,
+                    "--merge-output-format", "mp4",
+                    "-o", out_tmpl,
+                    url,
+                ]
+            else:
+                # Instagram / Facebook / TikTok / Twitter — pre-merged single stream
+                # Use best mp4 directly; no merging needed
+                fmt = "best[ext=mp4]/best"
+                cmd = YTDLP_CMD + COMMON_FLAGS + [
+                    "-f", fmt,
+                    "--merge-output-format", "mp4",
+                    "-o", out_tmpl,
+                    url,
+                ]
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
 
