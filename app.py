@@ -48,8 +48,8 @@ COMMON_FLAGS = [
     "--ffmpeg-location", FFMPEG,
     "--no-warnings",
     "--no-playlist",
-    "--extractor-args", "youtube:player_client=ios,android,web",
-    "--user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+    "--force-ipv4",
+    "--extractor-args", "youtube:player_client=android,ios,tv",
 ]
 
 def detect_platform(url):
